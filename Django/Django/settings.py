@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
     'order',
     'products',
     'customers',
@@ -86,16 +87,19 @@ WSGI_APPLICATION = 'Django.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mydatabase',  # Tên database trong MySQL
-        'USER': 'root',  # Tài khoản MySQL (mặc định của XAMPP là 'root')
-        'PASSWORD': '',  # Mật khẩu (mặc định của XAMPP là rỗng)
+        'NAME': 'noithat',  # Tên database trong MySQL
+        'USER': 'root',  # Tài khoản MySQL
+        'PASSWORD': '',  # Mật khẩu (để trống nếu dùng XAMPP)
         'HOST': '127.0.0.1',  # Chạy MySQL trên localhost
-        'PORT': '3306',  # Cổng mặc định của MySQL
+        'PORT': '3306',  # Cổng mặc định MySQL
         'OPTIONS': {
             'charset': 'utf8mb4',
-        },
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
+
+
 
 
 # Password validation
