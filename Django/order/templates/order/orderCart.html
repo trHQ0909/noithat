@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện Thanh Toán Đơn Hàng</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .checkout-container {
+            background-color: white;
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .checkout-container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .order-summary {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+
+        .order-summary h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .product-list {
+            margin-bottom: 20px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .product-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .product-details {
+            flex-grow: 1;
+        }
+
+        .product-details h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .product-details p {
+            margin: 5px 0;
+            color: #7f8c8d;
+        }
+
+        .product-details input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+
+        .order-summary .total {
+            font-weight: bold;
+            color: #626160;
+            font-size: 18px;
+            text-align: right;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #323333, #3b3b3b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            margin: 5px;
+        }
+
+        .btn-pay:hover {
+            background: linear-gradient(90deg, #5b5b5b, #6d6e6e);
+            transform: translateY(-2px);
+        }
+
+        .btn-pay:active {
+            transform: translateY(0);
+        }
+
+        .btn-back {
+            width: 100%;
+            padding: 15px;
+
+            background: linear-gradient(90deg, #ffffff, #ffffff);
+            color: rgb(65, 65, 65);
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            margin: 2px;
+        }
+
+        .btn-back:hover {
+            background: linear-gradient(90deg, #cad5dc, #cacfd2);
+            transform: translateY(-2px);
+        }
+
+        .btn-back:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <h2>Thanh Toán Đơn Hàng</h2>
+        
+        <!-- Thông tin khách hàng -->
+        <form action="{% url 'OrderCart' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="fullName">Họ và Tên</label>
+                <input type="text" id="fullName" value="{{customer.name}}" name="fullName" placeholder="Nhập họ và tên" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Địa chỉ giao hàng</label>
+                <input type="text" id="address" value="{{customer.address}}" name="address" placeholder="Nhập địa chỉ" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Số điện thoại</label>
+                <input type="tel" id="phone" value="{{customer.phone}}" name="phone" placeholder="Nhập số điện thoại" required>
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">Phương thức thanh toán</label>
+                <select id="paymentMethod" name="paymentMethod" required>
+                    <option value="">Chọn phương thức</option>
+                    <option value="cod">Thanh toán khi nhận hàng (COD)</option>
+                    <option value="bank">Chuyển khoản ngân hàng</option>
+                    <option value="momo">Ví MoMo</option>
+                </select>
+            </div>
+
+            <!-- Chi tiết đơn hàng -->
+            <div class="order-summary">
+                <h3>Tóm tắt đơn hàng</h3>
+                <div class="product-list">
+                    {% if request.session.customerid %}
+                    {% for cart in carts %}
+                    <!-- Sản phẩm -->
+                    <div class="product-item" data-cart-id="{{ cart.cartid }}">
+                        <input type="hidden" name="cart_items[]" value="{{cart.cartid}}">
+                        <img src="{{MEDIA_URL}}{{cart.image_url}}" alt="{{cart.product_name}}">
+                        <div class="product-details">
+                            <h4>{{cart.product_name}}</h4>
+                            <p class="price" data-price="{{cart.price}}">Giá: {{cart.price}} VND</p>
+                            <input type="number" min="1" value="{{cart.quantity}}" name="cart[{{cart.cartid}}][qty]" class="quantity">
+                            <input type="hidden" name="cart_items[]" value="{{cart.cartid}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p>Không có sản phẩm trong giỏ hàng.</p>
+                    {% endif %}
+                </div>
+                <p>Phí vận chuyển: 30.000 VNĐ</p>
+                <p class="total">0 VNĐ</p>
+            </div>
+
+            <!-- Nút thanh toán -->
+            <button type="submit" class="btn-pay">Xác nhận thanh toán</button>
+            <button type="submit" class="btn-back">Hủy</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const productItems = document.querySelectorAll('.product-item');
+            const totalPriceElement = document.querySelector('.total');
+            const shippingFee = 30000; // Phí vận chuyển cố định
+
+            function updateTotalPrice() {
+                let total = 0;
+
+                // Lặp qua từng sản phẩm
+                productItems.forEach(item => {
+                    const price = parseFloat(item.querySelector('.price').dataset.price);
+                    const quantity = parseInt(item.querySelector('.quantity').value) || 1;
+                    total += price * quantity;
+                });
+
+                // Cộng phí vận chuyển
+                total += shippingFee;
+
+                // Cập nhật hiển thị tổng tiền
+                totalPriceElement.textContent = total.toLocaleString("vi-VN") + " VNĐ";
+            }
+
+            // Gắn sự kiện thay đổi số lượng cho mỗi input
+            productItems.forEach(item => {
+                const quantityInput = item.querySelector('.quantity');
+                quantityInput.addEventListener("input", function () {
+                    if (this.value < 1) this.value = 1; // Đảm bảo số lượng không nhỏ hơn 1
+                    updateTotalPrice();
+                });
+            });
+
+            // Cập nhật tổng tiền ngay khi trang tải
+            updateTotalPrice();
+        });
+    </script>
+</body>
+</html>

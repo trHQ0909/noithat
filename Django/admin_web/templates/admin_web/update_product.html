@@ -1,0 +1,87 @@
+<html>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý hàng hóa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'admin_web/styles_update.css' %}">
+</head>
+
+<body>
+    <div id="update">
+        <form id="updateForm" method="post" enctype="multipart/form-data"
+            action="{% url 'update' product.product_id %}">
+            {% csrf_token %}
+            <h1>Chỉnh sửa sản phẩm</h1>
+            <div class="form-group">
+                <label for="product-name">Tên sản phẩm:</label>
+                <input type="text" id="product-name" name="name" value="{{ product.name }}" placeholder="Tên sản phẩm">
+            </div>
+            <div class="form-group">
+                <label for="category">Danh mục:</label>
+                <select id="category" name="category_id">
+                    <option value="all">Tất cả</option>
+                    {% for category in categories %}
+                        <optgroup label="{{ category.main_category.name }}">
+                            {% for subcategory in category.sub_categories %}
+                                <option value="{{ subcategory.categoryid }}" 
+                                    {% if subcategory.categoryid == product.category_id %} selected {% endif %}>
+                                    {{ subcategory.name }}
+                                </option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="price">Giá:</label>
+                <input type="number" name="price" id="price" value="{{product.price}}" placeholder="Nhập giá">
+            </div>
+            <div class="form-group">
+                <label for="stock">Số lượng tồn:</label>
+                <input type="number" name="stock" id="stock" value="{{product.stock}}" placeholder="Tồn kho">
+            </div>
+            <div class="form-group">
+                <label for="stock">Số lượng đã bán</label>
+                <input type="number" name="sold" id="sold" value="{{product.sold}}" placeholder="Đã bán">
+            </div>
+            <div class="form-group">
+                <label for="description">Mô tả:</label>
+                <textarea name="description" id="description" value=""
+                    placeholder="Nhập mô tả">{{product.description}}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="status">Trạng thái sản phẩm</label>
+                <select id="status" name="status">
+                    <option value="0" {% if product.status == 0 %}selected{% endif %}>Chờ duyệt</option>
+                    <option value="1" {% if product.status == 1 %}selected{% endif %}>Đang bán</option>
+                    <option value="2" {% if product.status == 2 %}selected{% endif %}>Ngừng bán</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="update-images">Ảnh sản phẩm:</label>
+
+                <input type="file" id="update-images" name="images" multiple accept="image/*">
+
+                <div id="update-image-preview" class="image-preview"> <!-- Thêm phần hiển thị ảnh -->
+                    {% for image in product.images %}
+                    <div class="image-container" data-file-name="{{ image.image_url }}">
+                        <img src="{{ MEDIA_URL }}{{ image.image_url }}" alt="Ảnh sản phẩm">
+                        <button class="delete-btn">×</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit">Lưu</button>
+            <a href="{% url 'product-list' %}">
+                <button>Hủy</button>
+            </a>
+        </form>
+    </div>
+    <script src="{% static 'admin_web/script_update.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý hàng hóa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- <link rel="stylesheet" href="../../static/admin_web/styles.css"> -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'admin_web/styles.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Quản lý</h2>
+            <ul>
+                <li onclick="showSection('dashboard')"><i class="fas fa-home"></i> Tổng quan</li>
+                <li onclick="showSection('add-product')"><i class="fas fa-plus-circle"></i> Thêm hàng hóa</li>
+                <li onclick="showSection('manage-products')"><i class="fas fa-box"></i> Quản lý sản phẩm</li>
+                <li onclick="showSection('order-stats')"><i class="fas fa-chart-line"></i> Thống kê đơn hàng</li>
+                <li onclick="showSection('sold-stats')"><i class="fas fa-shopping-cart"></i> Hàng đã bán</li>
+                <li onclick="showSection('inventory-stats')"><i class="fas fa-warehouse"></i> Hàng tồn kho</li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Tổng quan -->
+            <div id="dashboard" class="section active">
+                <h1>Tổng quan</h1>
+                <br>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Tổng đơn hàng</h3>
+                        <p>{{statistics.total_orders}}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Hàng đã bán</h3>
+                        <p>{{statistics.total_sold}}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Hàng tồn kho</h3>
+                        <p>{{statistics.total_stock}}</p>
+                    </div>
+                </div>
+                <br>
+                <br>
+                <div id="manage-products">
+                    <br>
+                    <label for="category-filter">Lọc theo danh mục:</label>
+                    <select id="category-filter">
+                        <option value="" data-url="" selected></option>
+                        <option value="all" data-url="all">Tất cả</option>
+                        {% for category in categories %}
+                        <optgroup label="{{ category.main_category.name }}">
+                            {% for subcategory in category.sub_categories %}
+                            <option value="{{ subcategory.categoryid }}" data-url="{{ subcategory.categoryid }}">
+                                {{subcategory.name }}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                    <div class="product-container">
+                        {% for product in products %}
+                        <div class="product-box">
+                            <img src="{{ MEDIA_URL }}{{ product.image_url }}" alt="Sản phẩm A">
+                            <h3>{{ product.name }}</h3>
+                            <p>{{ product.price }} VNĐ</p>
+
+                            <button class="update-btn" onclick="updateProduct('{{product.productid}}')">
+                                Cập nhật
+                            </button>
+
+                            <!-- Button xóa -->
+                            <button class="delete-btn"
+                                data-url="{% url 'delete_product' product_id=product.productid %}"
+                                onclick="deleteProduct(this, '{{ product.name }}')">
+                                Xóa
+                            </button>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Thêm hàng hóa -->
+            <!-- Trong file index.html, thay phần form trong section add-product -->
+            <div id="add-product" class="section">
+                <h1>Thêm hàng hóa</h1>
+                <form id="addForm" method="post" enctype="multipart/form-data" action="{% url 'create_product' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="product-name">Tên sản phẩm:</label>
+                        <input type="text" id="product-name" name="name" placeholder="Nhập tên sản phẩm">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Danh mục:</label>
+                        <select id="category" name="category_id">
+                            <option value="all">Tất cả</option>
+                            {% for category in categories %}
+                            <optgroup label="{{ category.main_category.name }}">
+                                {% for subcategory in category.sub_categories %}
+                                <option value="{{ subcategory.categoryid }}">{{ subcategory.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Giá:</label>
+                        <input type="number" name="price" id="price" placeholder="Nhập giá">
+                    </div>
+                    <div class="form-group">
+                        <label for="stock">Số lượng tồn:</label>
+                        <input type="number" name="stock" id="stock" placeholder="Nhập số lượng">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Mô tả:</label>
+                        <textarea name="description" id="description" placeholder="Nhập mô tả"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="images">Ảnh sản phẩm:</label>
+                        <input type="file" id="images" name="images" multiple accept="image/*">
+                        <div id="image-preview" class="image-preview"></div> <!-- Thêm phần hiển thị ảnh -->
+                    </div>
+                    <button type="submit">Thêm sản phẩm</button>
+                    <a href="{% url 'product-list' %}">
+                        <button type="button"> Hủy</button>
+                    </a>
+                </form>
+            </div>
+
+            <!-- Thống kê đơn hàng -->
+            <div id="order-stats" class="section">
+                <h1>Thống kê đơn hàng</h1>
+                <br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Ngày giao hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {%for order in orders %}
+                        <tr>
+                            <td>{{order.orderid}}</td>
+                            <td>{{order.customerid__name}}</td>
+                            <td>{{order.order_date}}</td>
+                            <td>{{order.delivery_date}}</td>
+                            <td>{{order.total_price}} VND</td>
+                            <td>{{order.status}}</td>
+                        </tr>
+                        {%endfor%}
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Hàng đã bán -->
+            <div id="sold-stats" class="section">
+                <h1>Hàng đã bán</h1>
+                <h2>Tổng tiền : {{total_revenue}}</h2>
+                <br>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Giá</th>
+                                <th>Thành tiền</th>
+                                <th>Ngày bán</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in sold_products %}
+                            <tr>
+                                <td>{{product.productid}}</td>
+                                <td>{{product.productid__name}}</td>
+                                <td>{{product.quantity}}</td>
+                                <td>{{product.price}}</td>
+                                <td>{{product.subtotal}}</td>
+                                <td>{{product.created_at}}</td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hàng tồn kho -->
+            <div id="inventory-stats" class="section">
+                <h1>Hàng tồn kho </h1>
+                <br>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Giá</th>
+                                <th>Đã bán</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in stock_products %}
+                            <tr>
+                                <td>{{product.productid}}</td>
+                                <td>{{product.name}}</td>
+                                <td>{{product.price}}</td>
+                                <td>{{product.sold}}</td>
+                                <td>{{product.stock}}</td>
+                                <td>
+                                    {% if product.status == 0 %}
+                                    Chờ duyệt
+                                    {% elif product.status == 1 %}
+                                    Đang bán
+                                    {% elif product.status == 2 %}
+                                    Ngừng bán
+                                    {% else %}
+                                    Không xác định
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script src="../../static/admin_web/script.js"></script> -->
+    <script src="{% static 'admin_web/script.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</body>
+
+</html>

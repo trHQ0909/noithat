@@ -1,0 +1,11 @@
+python manage.py runserver
+python manage.py collectstatic
+python manage.py shell
+
+Xử lí order cho Cart.
+Xử lí checkout cho cart.
+Giao diện khách hàng
++)Xem đơn hàng
++)Xem thông tin cá nhân.
+Giao diện admin:
++Thêm biểu đồ. 

@@ -11,9 +11,25 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'products', 'data')
+
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [  # Kiểm tra đường dẫn này
+    os.path.join(BASE_DIR, "admin_web/static"),  # Nếu có thư mục static trong app
+    os.path.join(BASE_DIR, "products/static"),
+    os.path.join(BASE_DIR, "accounts/static/accounts"),
+    os.path.join(BASE_DIR, "customers/static/customer"),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Nơi thu thập file tĩnh khi deploy
+
+# Định nghĩa MEDIA_URL để truy cập file media từ trình duyệt
 
 
 # Quick-start development settings - unsuitable for production
@@ -59,10 +75,11 @@ ROOT_URLCONF = 'Django.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS':  [],
         'APP_DIRS': True,
-        'OPTIONS': {
+        'OPTIONS': {    
             'context_processors': [
+                'django.template.context_processors.media', 
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -71,7 +88,8 @@ TEMPLATES = [
         },
     },
 ]
-
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_SAVE_EVERY_REQUEST = True  # Luôn lưu session khi có request
 WSGI_APPLICATION = 'Django.wsgi.application'
 
 
@@ -92,10 +110,13 @@ DATABASES = {
         'PASSWORD': '',  # Mật khẩu (để trống nếu dùng XAMPP)
         'HOST': '127.0.0.1',  # Chạy MySQL trên localhost
         'PORT': '3306',  # Cổng mặc định MySQL
-        'OPTIONS': {
+        
+        'OPTIONS': 
+        {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
+        
     }
 }
 
@@ -130,7 +151,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False 
 
 
 # Static files (CSS, JavaScript, Images)
@@ -142,3 +163,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Định nghĩa MEDIA_ROOT để lưu trữ ảnh và file tải lên

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Detail</title>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .product-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            min-height: 600px;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .thumbnail-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            max-width: 550px;
+            /* 5 ảnh x 100px + khoảng cách */
+            overflow-x: auto;
+            padding-bottom: 10px;
+            /* Để tránh cắt ảnh do thanh cuộn */
+            scrollbar-width: thin;
+            /* Tùy chỉnh thanh cuộn cho Firefox */
+            scrollbar-color: #ccc transparent;
+        }
+
+        .thumbnail-container::-webkit-scrollbar {
+            height: 8px;
+            /* Độ cao thanh cuộn */
+        }
+
+        .thumbnail-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            /* Màu nền thanh cuộn */
+            border-radius: 10px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar-thumb {
+            background: #888;
+            /* Màu của thanh kéo */
+            border-radius: 10px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+            /* Màu khi hover */
+        }
+
+        .thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .quantity-button {
+            padding: 8px 12px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+
+        .quantity-input {
+            width: 80px;
+            text-align: center;
+            border: 1px solid #ccc;
+            margin: 0 5px;
+            font-size: 20px;
+            border-radius: 5px;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .buy-button,
+        .cart-button {
+            padding: 20px 50px;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+
+        }
+
+        .buy-button {
+            background-color: #f0eded;
+            margin-right: 10px;
+            margin-top: 100px;
+            color: rgb(4, 4, 4)
+        }
+
+        .buy-button:hover {
+            background-color: #cacaca;
+        }
+
+        .cart-button {
+            background-color: #000000;
+            color: #ddd
+        }
+
+        .cart-button:hover {
+            background-color: #606060;
+        }
+
+        .description {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-selector {
+            margin-top: 15px;
+            font-size: 25px;
+        }
+
+        .status-selector select {
+            font-size: 20px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .home-icon {
+            position: absolute;
+            top: 0px;
+            left: 20px;
+            font-size: 80px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #000000;
+        }
+
+        .home-icon:hover {
+            color: #605f5f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="{% url 'product-home' %}" class="home-icon">&#8962;</a>
+        <div class="product-detail">
+            <!-- Image Gallery -->
+            <div>
+                {% for image in product.images %}
+                {% if image.is_main %}
+                <img id="mainImage" src="{{ MEDIA_URL }}{{ image.image_url }}" class="main-image" alt="Product Image">
+                {% endif %}
+                {% endfor %}
+
+                <div class="thumbnail-container">
+                    {% for image in product.images %}
+                    <img onclick="changeImage(this)" src="{{MEDIA_URL}}{{image.image_url}}" class="thumbnail">
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Product Details -->
+            <div>
+                <label id="productid" style="display:none;">{{product.productid}}</label>
+                <h1 style="font-size: 45px; font-weight: bold; font-family: 'Roboto', sans-serif;">{{product.name}}</h1>
+                <p style="font-size: 25px; color: rgb(112, 25, 25); margin-top: 10px;">
+                    <span>{{ product.price }}</span>  <span style="font-size: 15px; color: rgb(255, 60, 60); margin-top: 10px;" >VND</span>
+                  </p>
+                <div class="status-selector">
+                    {% if product.status == 0 %}
+                    <label style="font-size: 18px; font-weight: bold; color: #fd4545; margin-left: 10px;">Ngừng
+                        bán</label>
+                    {% elif product.status == 1 %}
+                    <label style="font-size: 18px; font-weight: bold; color: #507c5e; margin-left: 10px;">Đang
+                        bán</label>
+                    {% elif product.status == 2 %}
+                    <label style="font-size: 18px; font-weight: bold; color: #434343; margin-left: 10px;">Chờ
+                        duyệt</label>
+                    {% endif %}
+                </div>
+                <div class="quantity-selector">
+                    <button onclick="decreaseQuantity()" class="quantity-button">-</button>
+                    <input id="quantity" type="text" value="1" class="quantity-input">
+                    <button onclick="increaseQuantity()" class="quantity-button">+</button>
+                </div>
+                <div class="button-container">
+                    {% if product.status != 0 %}
+                    <button onclick="Buy()" class="buy-button">Buy Now</button>
+                    {% endif %}
+                    <button onclick="Cart()" class="cart-button">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        <div class="description">
+            <h2 style="font-size: 22px; font-weight: bold;">Product Description</h2>
+            <p style="margin-top: 10px; color: #555;">{{product.description}}</p>
+        </div>
+    </div>
+    <script>
+        function changeImage(element) {
+            let mainImage = document.getElementById('mainImage');
+            mainImage.src = element.src;
+        }
+        function increaseQuantity() {
+            let qty = document.getElementById('quantity');
+            qty.value = parseInt(qty.value) + 1;
+        }
+        function decreaseQuantity() {
+            let qty = document.getElementById('quantity');
+            if (qty.value > 1) qty.value = parseInt(qty.value) - 1;
+        }
+        function Buy() {
+            const pathArray = window.location.pathname.split('/'); 
+            const productid = pathArray[2];
+            let quantity = document.getElementById('quantity')
+            window.location.href = `/order/buyProduct/${productid}/${quantity.value}/`;
+        }
+        function Cart() {
+            const pathArray = window.location.pathname.split('/'); 
+            const productid = pathArray[2];
+            let quantity = document.getElementById('quantity');
+            window.location.href = `/order/addCart/${productid}/${quantity.value}/`;
+        }
+
+    </script>
+</body>
+
+</html>

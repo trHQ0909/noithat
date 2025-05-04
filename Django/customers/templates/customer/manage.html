@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../static/customer/style.css">
+    <title>Account Page</title>
+    <style>
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .menu-item2.active {
+            border-left: 4px solid #007bff;
+            background-color: #f0f9ff;
+        }
+
+        .menu-item2.active .menu-link {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .menu-item2:hover {
+            background-color: #e6f3ff;
+        }
+
+        .menu-item2 {
+            transition: border-left 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* CSS để hiển thị icon lịch và giữ chức năng chọn ngày */
+        input[type="date"] {
+            position: relative;
+            z-index: 1;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            cursor: pointer;
+            z-index: 2; /* Đảm bảo vùng nhấp nằm trên cùng */
+        }
+
+        /* Đảm bảo SVG hiển thị rõ ràng */
+        .custom-date-icon {
+            z-index: 3; /* Đặt SVG trên input */
+            pointer-events: none; /* Không chặn sự kiện nhấp */
+        }
+    </style>
+</head>
+
+<body>
+    <main class="main-content m-auto w-full flex flex-1 justify-center">
+        <div class="account-page py-8 px-[15px] md:gap-6 m-auto w-full max-w-screen-xl flex flex-col lg:flex-row lg:gap-10">
+            <!-- Sidebar -->
+            <div class="account-sidebar flex w-full lg:w-[288px] lg:sticky lg:top-36 z-20 self-start">
+                <div class="sidebar-menu w-full">
+                    <div class="account-menus hidden lg:flex w-full py-1 flex-col border rounded-md">
+                        <div class="menu-item2 menu-account ml-1 px-6" data-section="account">
+                            <a class="menu-link py-3 h-[45px] flex gap-2 items-center leading-5 hover:text-primary" href="#">
+                                <svg width="18" height="19" viewBox="0 0 18 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 9.5C11.2091 9.5 13 7.70914 13 5.5C13 3.29086 11.2091 1.5 9 1.5C6.79086 1.5 5 3.29086 5 5.5C5 7.70914 6.79086 9.5 9 9.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"></path>
+                                    <path d="M7.98855 11.6992H10.0115C13.8703 11.6992 17 14.3511 17 17.6138V18.1992H1V17.6138C1 14.348 4.13344 11.6992 7.98855 11.6992Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"></path>
+                                </svg>
+                                Thông tin tài khoản
+                            </a>
+                        </div>
+                        <div class="menu-item2 menu-order ml-1 px-6" data-section="order">
+                            <a class="menu-link py-3 h-[45px] flex gap-2 items-center leading-5 hover:text-primary" href="#">
+                                <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0_27065_55597)">
+                                        <path d="M0.808594 3.5H2.77478C2.96027 3.5 3.12102 3.63603 3.14576 3.83388L4.6915 15.6062H15.6477" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                        <path d="M4.54297 13.4035H16.7358C16.9213 13.4035 17.082 13.2674 17.1068 13.0943L17.9989 5.5" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                        <path d="M15.3744 19.1805C16.3579 19.1805 17.1551 18.3833 17.1551 17.3998C17.1551 16.4164 16.3579 15.6191 15.3744 15.6191C14.391 15.6191 13.5938 16.4164 13.5938 17.3998C13.5938 18.3833 14.391 19.1805 15.3744 19.1805Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                        <path d="M5.94085 19.1805C6.9243 19.1805 7.72154 18.3833 7.72154 17.3998C7.72154 16.4164 6.9243 15.6191 5.94085 15.6191C4.9574 15.6191 4.16016 16.4164 4.16016 17.3998C4.16016 18.3833 4.9574 19.1805 5.94085 19.1805Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                        <path d="M10.6992 11.5C13.4606 11.5 15.6992 9.26143 15.6992 6.5C15.6992 3.73858 13.4606 1.5 10.6992 1.5C7.9378 1.5 5.69922 3.73858 5.69922 6.5C5.69922 9.26143 7.9378 11.5 10.6992 11.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        <path d="M10.6992 3.47461V6.31808C10.6992 6.35658 10.7157 6.39508 10.7432 6.42258L12.7947 8.45756" stroke="currentColor" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                    </g>
+                                    <defs>
+                                        <clipPath id="clip0_27065_55597">
+                                            <rect width="20" height="20" fill="white" transform="translate(0 0.5)"></rect>
+                                        </clipPath>
+                                    </defs>
+                                </svg>
+                                Đơn hàng
+                            </a>
+                        </div>
+                        <div class="menu-item2 menu-wishlist ml-1 px-6" data-section="wishlist">
+                            <a class="menu-link py-3 h-[45px] flex gap-2 items-center leading-5 hover:text-primary" href="#">
+                                <svg fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.6303 1.5475C11.1599 1.11409 10.1325 3.77308 9.94981 4.3939C9.94981 4.42904 9.89273 4.42904 9.88132 4.3939C9.68725 3.77308 8.67123 1.11409 5.20079 1.5475C0.794238 2.09804 -0.0505407 7.73227 2.22123 10.3913C3.76238 12.1834 8.13468 16.7166 9.51601 18.1574C9.73291 18.3799 10.0754 18.3799 10.2923 18.1574C11.6736 16.7166 16.0231 12.1483 17.5985 10.3913C19.8246 7.88455 19.0255 2.09804 14.6303 1.55921V1.5475Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"></path>
+                                </svg>
+                                Danh sách yêu thích
+                            </a>
+                        </div>
+                        <div class="menu-item2 menu-address ml-1 px-6" data-section="address">
+                            <a class="menu-link py-3 h-[45px] flex gap-2 items-center leading-5 hover:text-primary" href="#">
+                                <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.55 17C16.9 17 18.41 17.93 18.86 18.12C18.93 18.15 19 18.1 19 18.03V4.13996C19 4.13996 18.98 4.05996 18.94 4.04996C18.61 3.90996 16.91 3 14.5 3C11.81 3 10 4.06996 10 4.06996C10 4.06996 8.19 3 5.5 3C3.09 3 1.38 3.90996 1.06 4.04996C1.02 4.06996 1 4.09996 1 4.13996V18.02C1 18.09 1.07 18.14 1.14 18.11C1.59 17.92 3.11 17 5.46 17C7.81 17 9.48 17.95 9.9 18.13C9.97 18.16 10.04 18.16 10.11 18.13C10.52 17.96 12.13 17 14.55 17Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                    <path d="M10 4.07031V17.8303" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                </svg>
+                                Danh sách địa chỉ
+                            </a>
+                        </div>
+                        <div class="menu-item2 menu-reviews ml-1 px-6" data-section="reviews">
+                            <a class="menu-link py-3 h-[45px] flex gap-2 items-center leading-5 hover:text-primary border-t" href="#">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17.1909 7.59034C17.1419 7.43828 17.0457 7.30584 16.9162 7.21231C16.7866 7.11877 16.6307 7.06903 16.4709 7.07034H11.3109L9.71091 2.16034C9.66585 2.00695 9.57233 1.87228 9.44434 1.77648C9.31635 1.68068 9.16078 1.62891 9.00091 1.62891C8.84104 1.62891 8.68547 1.68068 8.55748 1.77648C8.42949 1.87228 8.33597 2.00695 8.29091 2.16034L6.69091 7.07034H1.53091C1.37116 7.06903 1.21517 7.11877 1.08566 7.21231C0.956152 7.30584 0.859893 7.43828 0.810907 7.59034C0.760776 7.74183 0.760952 7.90546 0.811412 8.05684C0.861871 8.20822 0.95991 8.33923 1.09091 8.43034L5.26091 11.4303L3.67091 16.3803C3.62368 16.5296 3.62432 16.6898 3.67274 16.8387C3.72115 16.9875 3.81492 17.1175 3.94091 17.2103C4.06694 17.3076 4.22168 17.3604 4.38091 17.3604C4.54014 17.3604 4.69487 17.3076 4.82091 17.2103L9.00091 14.2103L13.1809 17.2103C13.3066 17.3083 13.4616 17.3611 13.6209 17.3603C13.78 17.3596 13.9345 17.3069 14.0609 17.2103C14.1869 17.1175 14.2807 16.9875 14.3291 16.8387C14.3775 16.6898 14.3781 16.5296 14.3309 16.3803L12.7409 11.5003L16.9109 8.50034C17.0572 8.40585 17.1655 8.2628 17.2167 8.09635C17.2679 7.9299 17.2588 7.75072 17.1909 7.59034Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"></path>
+                                </svg>
+                                Đánh giá
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content flex-1 min-h-[50vh]">
+                <div class="section account" id="account-section">
+                    <div class="my-account-page w-full m-auto max-w-[808px]">
+                        <h1 class="block-title w-full border-b pb-5 mb-5 font-bold text-[19px] lg:text-[25px]">Thông Tin Tài Khoản</h1>
+                        <div class="account-information">
+                            <div class="account-infos my-5 w-full flex gap-5 flex-col lg:flex-row lg:flex-wrap justify-between [&>*>.field]:flex [&>*>.field]:justify-start text-[13px] lg:text-[15px] [&>*>.field>.field-label]:w-1/3 [&>*>.field>.field-label]:min-w-[130px] [&>*>.field>.field-value]:text-gray-500">
+                                <div class="field-group w-full lg:w-[46%] flex flex-col gap-5">
+                                    <div class="field field-name">
+                                        <div class="field-label">Họ và Tên</div>
+                                        <div class="field-value break-words overflow-hidden">HQ Trần</div>
+                                    </div>
+                                    <div class="field field-birth">
+                                        <div class="field-label">Ngày sinh</div>
+                                        <div class="field-value">22/04/2003</div>
+                                    </div>
+                                    <div class="field field-birth">
+                                        <div class="field-label">Giới Tính</div>
+                                        <div class="field-value">Khác</div>
+                                    </div>
+                                </div>
+                                <div class="field-group w-full lg:w-[46%] flex flex-col gap-5">
+                                    <div class="field field-name">
+                                        <div class="field-label">Email</div>
+                                        <div class="field-value">tranhuuquoc12a10@gmail.com</div>
+                                    </div>
+                                    <div class="field field-birth">
+                                        <div class="field-label">Số Điện Thoại</div>
+                                        <div class="field-value">0978739435</div>
+                                    </div>
+                                    <div class="field field-birth">
+                                        <div class="field-label">Bản Tin</div>
+                                        <div class="field-value">Đã Đăng ký</div>
+                                    </div>
+                                </div>
+                                <div class="field-group w-full lg:w-[46%] lg:max-w-[392px] flex flex-col gap-5">
+                                    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 my-5 h-14 font-bold text-[15px] capitalize w-full max-w-[392px]">Chỉnh sửa thông tin</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section order hidden" id="order-section">
+                    <div class="order-page">
+                        <h1 class="page-title mt-2 md:mt-0 mb-10 md:mb-6 text-[19px] font-bold md:text-[25px] md:leading-10">Danh sách đơn hàng</h1>
+                        <div class="message message-type-warning p-4 bg-[#F4EEDE] text-gray-800 flex items-start gap-2">
+                            <div class="message-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" x2="12" y1="8" y2="12"></line>
+                                    <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                                </svg>
+                            </div>
+                            <div class="message-text text-[13px] leading-6">Bạn chưa đặt đơn hàng nào.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section wishlist hidden" id="wishlist-section">
+                    <div class="wishlist-page ml-[-15px] mr-[-15px] md:mx-0">
+                        <h1 class="page-title pl-4 lg:pl-0">Danh Sách Yêu Thích Của Tôi <span class="wishlist_count">(0)</span></h1>
+                        <div class="wishlist-container">
+                            <div class="message message-type-warning p-4 bg-[#F4EEDE] text-gray-800 flex items-start gap-2">
+                                <div class="message-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" x2="12" y1="8" y2="12"></line>
+                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                                    </svg>
+                                </div>
+                                <div class="message-text text-[13px] leading-6">Bạn chưa có sản phẩm nào trong danh sách yêu thích.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section address hidden" id="address-section">
+                    <div class="address-page">
+                        <h1 class="page-title mt-2 md:mt-0 mb-10 md:mb-6 text-[19px] font-bold md:text-[25px] md:leading-10">Danh sách địa chỉ</h1>
+                        <div class="message message-type-warning p-4 bg-[#F4EEDE] text-gray-800 flex items-start gap-2">
+                            <div class="message-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" x2="12" y1="8" y2="12"></line>
+                                    <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                                </svg>
+                            </div>
+                            <div class="message-text text-[13px] leading-6">Bạn chưa có địa chỉ nào.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section reviews hidden" id="reviews-section">
+                    <div class="reviews-page">
+                        <h1 class="page-title mt-2 md:mt-0 mb-10 md:mb-6 text-[19px] font-bold md:text-[25px] md:leading-10">Đánh giá</h1>
+                        <div class="message message-type-warning p-4 bg-[#F4EEDE] text-gray-800 flex items-start gap-2">
+                            <div class="message-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" x2="12" y1="8" y2="12"></line>
+                                    <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                                </svg>
+                            </div>
+                            <div class="message-text text-[13px] leading-6">Bạn chưa có đánh giá nào.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Lắng nghe sự kiện click trên các menu item
+        document.querySelectorAll('.menu-item2').forEach(item => {
+            item.addEventListener('click', function (event) {
+                event.preventDefault();
+                const section = this.getAttribute('data-section');
+                document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                document.querySelectorAll('.menu-item2').forEach(menuItem => menuItem.classList.remove('active'));
+                document.getElementById(`${section}-section`).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Hiển thị section đầu tiên mặc định
+        document.getElementById('account-section').classList.add('active');
+        document.querySelector('.menu-item2[data-section="account"]').classList.add('active');
+
+        // Lưu nội dung ban đầu của account-information
+        const accountInformation = document.querySelector('.account-information');
+        const originalContent = accountInformation.innerHTML;
+
+        // Nội dung của form chỉnh sửa tài khoản
+        const formEditAccountContent = `
+<div class="form-edit-account">
+    <div class="w-full m-auto max-w-[420px] md:max-w-[900px] flex flex-col md:flex-row md:gap-5 lg:gap-6 md:justify-between">
+        <div class="form-account md:max-w-[392px] flex-1 lg:w-[48%] mb-10 lg:mb-0">
+            <h3 class="block-title text-[15px] font-bold lg:text-[19px] mb-5">Thông Tin Tài Khoản</h3>
+            <form class="form-muji flex flex-col justify-center space-y-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email" aria-required="true">Email</label>
+                    <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="email" placeholder="Nhập email" disabled="" aria-describedby=":r1v:-form-item-description" aria-invalid="false" value="tranhuuquoc12a10@gmail.com" name="email">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="fullName" aria-required="true">Họ và Tên</label>
+                    <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="fullName" placeholder="Nhập họ và tên" aria-describedby=":r20:-form-item-description" aria-invalid="false" type="text" value="HQ Trần" name="fullName">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="date_of_birth" aria-required="true">Ngày sinh</label>
+                    <div class="relative">
+                        <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10" id="date_of_birth" aria-describedby=":r21:-form-item-description" aria-invalid="false" type="date" value="2003-04-22" name="date_of_birth">
+                        <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 custom-date-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 2v4"></path>
+                            <path d="M16 2v4"></path>
+                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                            <path d="M3 10h18"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone" aria-required="true">Số điện thoại</label>
+                    <input class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="register_phone" placeholder="Nhập số điện thoại" aria-describedby=":r23:-form-item-description" aria-invalid="false" type="text" value="0978739435" name="register_phone">
+                </div>
+                <div class="space-y-2 mb-16">
+                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="gender">Giới Tính</label>
+                    <select class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" id="gender" name="gender">
+                        <option value="1">Nam</option>
+                        <option value="2">Nữ</option>
+                        <option value="3" selected>Khác</option>
+                    </select>
+                </div>
+                <div class="form-group relative !mt-8">
+                    <div class="flex flex-row items-start space-x-3 space-y-0">
+                        <button type="button" role="checkbox" aria-checked="true" data-state="checked" value="on" class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground checkbox-gray" id=":r26:-form-item" aria-describedby=":r26:-form-item-description" aria-invalid="false">
+                            <span data-state="checked" class="flex items-center justify-center text-current" style="pointer-events: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check h-4 w-4">
+                                    <path d="M20 6 9 17l-5-5"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <input aria-hidden="true" tabindex="-1" type="checkbox" value="on" checked="" style="transform: translateX(-100%); position: absolute; pointer-events: none; opacity: 0; margin: 0px; width: 20px; height: 20px;">
+                        <div class="space-y-1 leading-none">
+                            <label class="text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70 !text-[13px] leading-5 text-muji_note font-normal cursor-pointer" for=":r26:-form-item">Đăng Ký Nhận Bản Tin</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground checkbox-gray" id="change_password">
+                    </button>
+                    <input aria-hidden="true" tabindex="-1" type="checkbox" value="on" style="transform: translateX(-100%); position: absolute; pointer-events: none; opacity: 0; margin: 0px; width: 20px; height: 20px;">
+                    <label for="change_password" class="!text-[13px] leading-5 text-muji_note font-normal cursor-pointer">Thay Đổi Mật Khẩu</label>
+                </div>
+                <div class="actions hidden !mt-10 w-full max-w-[392px] flex-col gap-4 justify-between">
+                    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 h-14 font-bold text-[15px] capitalize" type="submit">Lưu</button>
+                    <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 h-14 font-bold text-[15px] capitalize" type="button" onclick="cancelEdit()">Hủy</button>
+                </div>
+            </form>
+        </div>
+        <div class="form-actions !mt-10 w-full max-w-[420px] m-auto md:ml-0 md:max-w-[392px] flex-1 flex flex-col gap-4 justify-start items-start">
+            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 h-14 w-full font-bold text-[15px] capitalize" type="button">Lưu</button>
+            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 h-14 w-full font-bold text-[15px] capitalize" type="button" onclick="cancelEdit()">Hủy</button>
+            <button class="items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 underline-offset-4 hover:underline h-10 p-0 font-bold inline-block w-full text-muji_alert text-[13px] md:text-left">
+                <span>Vô hiệu hóa tài khoản của bạn</span>
+            </button>
+        </div>
+    </div>
+</div>
+`;
+
+        // Hàm gắn sự kiện cho nút "Chỉnh sửa thông tin"
+        function attachEditEvent() {
+            const editButton = document.querySelector('.account-information button');
+            if (editButton) {
+                editButton.addEventListener('click', editAccount);
+            }
+        }
+
+        // Hàm xử lý khi nhấn "Chỉnh sửa thông tin"
+        function editAccount() {
+            accountInformation.innerHTML = formEditAccountContent;
+        }
+
+        // Hàm xử lý khi nhấn "Hủy"
+        function cancelEdit() {
+            accountInformation.innerHTML = originalContent;
+            attachEditEvent();
+        }
+
+        // Gán sự kiện ban đầu cho nút "Chỉnh sửa thông tin"
+        attachEditEvent();
+    </script>
+</body>
+
+</html>
