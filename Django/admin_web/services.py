@@ -3,22 +3,91 @@ from django.db.models import Sum
 from order.models import Order,OrderDetail  # Import model Order
 from customers.models import Customer
 from django.db.models import Sum
-from products.services import ( get_category_by_id,get_product_by_id
-)
+from products.services import *
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncDay
+from django.utils import timezone
+from datetime import timedelta
+
 def get_statistics():
-    # Đếm số đơn hàng
     total_orders = Order.objects.count()
-
-    # Tổng số hàng tồn kho
-    total_stock = Product.objects.aggregate(total_stock=Sum('stock'))['total_stock'] or 0
-
-    # Tổng số hàng đã bán
-    total_sold = Product.objects.aggregate(total_sold=Sum('sold'))['total_sold'] or 0
+    total_stock = Product.objects.aggregate(total=Sum('stock'))['total'] or 0
+    total_sold = Product.objects.aggregate(total=Sum('sold'))['total'] or 0
+    total_revenue = Order.objects.aggregate(total=Sum('total_price'))['total'] or 0
 
     return {
         "total_orders": total_orders,
         "total_stock": total_stock,
-        "total_sold": total_sold
+        "total_sold": total_sold,
+        "total_revenue": total_revenue
+    }
+
+def get_order_status_stats():
+    pending = Order.objects.filter(status='Pending').count()
+    shipped = Order.objects.filter(status='Shipped').count()
+    completed = Order.objects.filter(status='Completed').count()
+    cancelled = Order.objects.filter(status='Cancelled').count()
+    result = {
+        'labels': ['Đang chờ', 'Đã giao', 'Hoàn thành', 'Đã hủy'],
+        'data': [pending, shipped, completed, cancelled]
+    }
+    print("Debug order_status_stats:", result)
+    return result
+
+def get_order_trend_data(days=30):
+    date_from = timezone.now() - timedelta(days=days)
+    daily_orders = (
+        Order.objects
+        .filter(order_date__gte=date_from)
+        .annotate(date=TruncDay('order_date'))
+        .values('date')
+        .annotate(count=Count('orderid'), total=Sum('total_price'))
+        .order_by('date')
+    )
+    
+    labels = [entry['date'].strftime("%d-%m") for entry in daily_orders]
+    order_counts = [entry['count'] for entry in daily_orders]
+    revenues = [float(entry['total']) for entry in daily_orders]
+    
+    return {
+        'labels': labels,
+        'order_counts': order_counts,
+        'revenues': revenues
+    }
+
+def get_top_products(limit=5):
+    top_products = (
+        OrderDetail.objects
+        .values('productid__name')
+        .annotate(total_sold=Sum('quantity'), revenue=Sum('subtotal'))
+        .order_by('-total_sold')[:limit]
+    )
+    
+    labels = [entry['productid__name'] for entry in top_products]
+    total_sold = [entry['total_sold'] for entry in top_products]
+    revenues = [float(entry['revenue']) for entry in top_products]
+    
+    return {
+        'labels': labels,
+        'total_sold': total_sold,
+        'revenues': revenues
+    }
+
+def get_inventory_data():
+    inventory_products = (
+        Product.objects
+        .order_by('-stock')[:10]
+        .values('name', 'stock', 'sold')
+    )
+    
+    labels = [entry['name'] for entry in inventory_products]
+    stock = [entry['stock'] for entry in inventory_products]
+    sold = [entry['sold'] for entry in inventory_products]
+    
+    return {
+        'labels': labels,
+        'stock': stock,
+        'sold': sold
     }
 
 def create_product(product_obj):
@@ -40,6 +109,7 @@ def create_product(product_obj):
 def update_product(product_obj):
     if product_obj:
         product_obj.save()
+        print("Sau khi cập nhật",product_obj)
         return product_obj
     return None
 

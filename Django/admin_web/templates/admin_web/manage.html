@@ -1,16 +1,16 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hàng hóa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- <link rel="stylesheet" href="../../static/admin_web/styles.css"> -->
-    {% load static %}
     <link rel="stylesheet" href="{% static 'admin_web/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 </head>
-
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -31,22 +31,22 @@
             <!-- Tổng quan -->
             <div id="dashboard" class="section active">
                 <h1>Tổng quan</h1>
+                <h2>Tổng doanh thu: {{ statistics.total_revenue|floatformat:0 }} VNĐ</h2>
                 <br>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3>Tổng đơn hàng</h3>
-                        <p>{{statistics.total_orders}}</p>
+                        <p>{{ statistics.total_orders }}</p>
                     </div>
                     <div class="stat-card">
                         <h3>Hàng đã bán</h3>
-                        <p>{{statistics.total_sold}}</p>
+                        <p>{{ statistics.total_sold }}</p>
                     </div>
                     <div class="stat-card">
                         <h3>Hàng tồn kho</h3>
-                        <p>{{statistics.total_stock}}</p>
+                        <p>{{ statistics.total_stock }}</p>
                     </div>
                 </div>
-                <br>
                 <br>
                 <div id="manage-products">
                     <br>
@@ -66,42 +66,38 @@
                     <div class="product-container">
                         {% for product in products %}
                         <div class="product-box">
-                            <img src="{{ MEDIA_URL }}{{ product.image_url }}" alt="Sản phẩm A">
+                            <img src="{{MEDIA_URL }}{{ product.image_url }}" alt="{{ product.name }}">
                             <h3>{{ product.name }}</h3>
-                            <p>{{ product.price }} VNĐ</p>
-
-                            <button class="update-btn" onclick="updateProduct('{{product.productid}}')">
+                            <p>{{ product.price|floatformat:0 }} VNĐ</p>
+                            <button class="update-btn" onclick="updateProduct('{{ product.productid }}')">
                                 Cập nhật
                             </button>
-
-                            <!-- Button xóa -->
                             <button class="delete-btn"
                                 data-url="{% url 'delete_product' product_id=product.productid %}"
                                 onclick="deleteProduct(this, '{{ product.name }}')">
                                 Xóa
                             </button>
                         </div>
+                        {% empty %}
+                        <p>Không có sản phẩm nào</p>
                         {% endfor %}
-
                     </div>
                 </div>
             </div>
 
-
             <!-- Thêm hàng hóa -->
-            <!-- Trong file index.html, thay phần form trong section add-product -->
             <div id="add-product" class="section">
                 <h1>Thêm hàng hóa</h1>
                 <form id="addForm" method="post" enctype="multipart/form-data" action="{% url 'create_product' %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="product-name">Tên sản phẩm:</label>
-                        <input type="text" id="product-name" name="name" placeholder="Nhập tên sản phẩm">
+                        <input type="text" id="product-name" name="name" placeholder="Nhập tên sản phẩm" required>
                     </div>
                     <div class="form-group">
                         <label for="category">Danh mục:</label>
-                        <select id="category" name="category_id">
-                            <option value="all">Tất cả</option>
+                        <select id="category" name="category_id" required>
+                            <option value="" disabled selected>Chọn danh mục</option>
                             {% for category in categories %}
                             <optgroup label="{{ category.main_category.name }}">
                                 {% for subcategory in category.sub_categories %}
@@ -113,11 +109,11 @@
                     </div>
                     <div class="form-group">
                         <label for="price">Giá:</label>
-                        <input type="number" name="price" id="price" placeholder="Nhập giá">
+                        <input type="number" name="price" id="price" placeholder="Nhập giá" required min="0">
                     </div>
                     <div class="form-group">
                         <label for="stock">Số lượng tồn:</label>
-                        <input type="number" name="stock" id="stock" placeholder="Nhập số lượng">
+                        <input type="number" name="stock" id="stock" placeholder="Nhập số lượng" required min="0">
                     </div>
                     <div class="form-group">
                         <label for="description">Mô tả:</label>
@@ -126,11 +122,11 @@
                     <div class="form-group">
                         <label for="images">Ảnh sản phẩm:</label>
                         <input type="file" id="images" name="images" multiple accept="image/*">
-                        <div id="image-preview" class="image-preview"></div> <!-- Thêm phần hiển thị ảnh -->
+                        <div id="image-preview" class="image-preview"></div>
                     </div>
                     <button type="submit">Thêm sản phẩm</button>
                     <a href="{% url 'product-list' %}">
-                        <button type="button"> Hủy</button>
+                        <button type="button">Hủy</button>
                     </a>
                 </form>
             </div>
@@ -139,39 +135,69 @@
             <div id="order-stats" class="section">
                 <h1>Thống kê đơn hàng</h1>
                 <br>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Mã đơn</th>
-                            <th>Khách hàng</th>
-                            <th>Ngày đặt</th>
-                            <th>Ngày giao hàng</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {%for order in orders %}
-                        <tr>
-                            <td>{{order.orderid}}</td>
-                            <td>{{order.customerid__name}}</td>
-                            <td>{{order.order_date}}</td>
-                            <td>{{order.delivery_date}}</td>
-                            <td>{{order.total_price}} VND</td>
-                            <td>{{order.status}}</td>
-                        </tr>
-                        {%endfor%}
-
-                    </tbody>
-                </table>
+                <div class="chart-containerstatus">
+                    <h3>Trạng thái đơn hàng</h3>
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Xu hướng đơn hàng (30 ngày gần nhất)</h3>
+                    <canvas id="orderTrendChart"></canvas>
+                </div>
+                <br>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Ngày giao hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.orderid }}</td>
+                                <td>{{ order.customerid.name|default:"N/A" }}</td>
+                                <td>{{ order.order_date|date:"d-m-Y H:i" }}</td>
+                                <td>{{ order.delivery_date|date:"d-m-Y H:i"|default:"Chưa giao" }}</td>
+                                <td>{{ order.total_price|floatformat:0 }} VNĐ</td>
+                                <td>
+                                    {% if order.status == 'Pending' %}
+                                        Đang chờ
+                                    {% elif order.status == 'Shipped' %}
+                                        Đã giao
+                                    {% elif order.status == 'Completed' %}
+                                        Hoàn thành
+                                    {% elif order.status == 'Cancelled' %}
+                                        Đã hủy
+                                    {% else %}
+                                        Không xác định
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">Không có đơn hàng</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Hàng đã bán -->
             <div id="sold-stats" class="section">
                 <h1>Hàng đã bán</h1>
-                <h2>Tổng tiền : {{total_revenue}}</h2>
+                <h2>Tổng doanh thu: {{ statistics.total_revenue|floatformat:0 }} VNĐ</h2>
                 <br>
-
+                <div class="chart-container">
+                    <h3>Top 5 sản phẩm bán chạy</h3>
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+                <br>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -187,14 +213,18 @@
                         <tbody>
                             {% for product in sold_products %}
                             <tr>
-                                <td>{{product.productid}}</td>
-                                <td>{{product.productid__name}}</td>
-                                <td>{{product.quantity}}</td>
-                                <td>{{product.price}}</td>
-                                <td>{{product.subtotal}}</td>
-                                <td>{{product.created_at}}</td>
+                                <td>{{ product.productid.productid }}</td>
+                                <td>{{ product.productid.name|default:"N/A" }}</td>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.price|floatformat:0 }} VNĐ</td>
+                                <td>{{ product.subtotal|floatformat:0 }} VNĐ</td>
+                                <td>{{ product.created_at|date:"d-m-Y H:i" }}</td>
                             </tr>
-                            {%endfor%}
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">Không có sản phẩm đã bán</td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -202,7 +232,12 @@
 
             <!-- Hàng tồn kho -->
             <div id="inventory-stats" class="section">
-                <h1>Hàng tồn kho </h1>
+                <h1>Hàng tồn kho</h1>
+                <br>
+                <div class="chart-container">
+                    <h3>Top 10 sản phẩm tồn kho</h3>
+                    <canvas id="inventoryChart"></canvas>
+                </div>
                 <br>
                 <div class="table-container">
                     <table>
@@ -214,17 +249,16 @@
                                 <th>Đã bán</th>
                                 <th>Tồn kho</th>
                                 <th>Trạng thái</th>
-
                             </tr>
                         </thead>
                         <tbody>
-                            {% for product in stock_products %}
+                            {% for product in productStocks %}
                             <tr>
-                                <td>{{product.productid}}</td>
-                                <td>{{product.name}}</td>
-                                <td>{{product.price}}</td>
-                                <td>{{product.sold}}</td>
-                                <td>{{product.stock}}</td>
+                                <td>{{ product.productid }}</td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.price|floatformat:0 }} VNĐ</td>
+                                <td>{{ product.sold|default:0 }}</td>
+                                <td>{{ product.stock|default:0 }}</td>
                                 <td>
                                     {% if product.status == 0 %}
                                     Chờ duyệt
@@ -237,7 +271,11 @@
                                     {% endif %}
                                 </td>
                             </tr>
-                            {%endfor%}
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">Không có sản phẩm tồn kho</td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -245,9 +283,146 @@
         </div>
     </div>
 
-    <!-- <script src="../../static/admin_web/script.js"></script> -->
     <script src="{% static 'admin_web/script.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-</body>
+    <script>
+        Chart.register(ChartDataLabels);
+        // Order Status Chart (Pie Chart)
+        const orderStatusCtx = document.getElementById('orderStatusChart')?.getContext('2d');
+        if (orderStatusCtx) {
+            new Chart(orderStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: {{ order_status_stats.labels|safe }},
+                    datasets: [{
+                        data: {{ order_status_stats.data|safe }},
+                        backgroundColor: ['#FFC107', '#2196F3', '#4CAF50', '#F44336']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Phân bố trạng thái đơn hàng' }
+                    }
+                }
+            });
+        }
 
+        // Order Trend Chart (Line Chart)
+        const orderTrendCtx = document.getElementById('orderTrendChart')?.getContext('2d');
+        if (orderTrendCtx) {
+            new Chart(orderTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ order_trend_data.labels|safe }},
+                    datasets: [
+                        {
+                            label: 'Số đơn hàng',
+                            data: {{ order_trend_data.order_counts|safe }},
+                            borderColor: '#2196F3',
+                            fill: false
+                        },
+                        {
+                            label: 'Doanh thu (VNĐ)',
+                            data: {{ order_trend_data.revenues|safe }},
+                            borderColor: '#4CAF50',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { title: { display: true, text: 'Ngày' } }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Xu hướng đơn hàng và doanh thu' }
+                    }
+                }
+            });
+        }
+
+        // Top Products Chart (Bar Chart)
+        const topProductsCtx = document.getElementById('topProductsChart')?.getContext('2d');
+        if (topProductsCtx) {
+            new Chart(topProductsCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ top_products.labels|safe }},
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: {{ top_products.revenues|safe }},
+                        backgroundColor: '#4CAF50'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Doanh thu (VNĐ)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000) + 'M'; // Hiển thị doanh thu theo triệu VNĐ
+                                }
+                            }
+                        },
+                        x: { title: { display: true, text: 'Sản phẩm' } }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Top sản phẩm bán chạy' },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value, context) {
+                                const totalSold = {{ top_products.total_sold|safe }};
+                                return 'SL: ' + totalSold[context.dataIndex] + ' cái';
+                            },
+                            color: '#000',
+                            font: { weight: 'bold', size: 14 },
+                            padding: 6,
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            borderRadius: 4
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inventory Chart (Bar Chart)
+        const inventoryCtx = document.getElementById('inventoryChart')?.getContext('2d');
+        if (inventoryCtx) {
+            new Chart(inventoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ inventory_data.labels|safe }},
+                    datasets: [
+                        {
+                            label: 'Tồn kho',
+                            data: {{ inventory_data.stock|safe }},
+                            backgroundColor: '#FF9800'
+                        },
+                        {
+                            label: 'Đã bán',
+                            data: {{ inventory_data.sold|safe }},
+                            backgroundColor: '#2196F3'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { title: { display: true, text: 'Sản phẩm' } }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Top sản phẩm tồn kho' }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
 </html>

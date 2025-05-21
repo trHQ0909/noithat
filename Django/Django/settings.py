@@ -25,6 +25,7 @@ STATICFILES_DIRS = [  # Kiểm tra đường dẫn này
     os.path.join(BASE_DIR, "products/static"),
     os.path.join(BASE_DIR, "accounts/static/accounts"),
     os.path.join(BASE_DIR, "customers/static/customer"),
+    os.path.join(BASE_DIR, "templatetags "),
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Nơi thu thập file tĩnh khi deploy

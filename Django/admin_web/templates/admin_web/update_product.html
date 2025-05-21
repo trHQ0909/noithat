@@ -12,7 +12,7 @@
 <body>
     <div id="update">
         <form id="updateForm" method="post" enctype="multipart/form-data"
-            action="{% url 'update' product.product_id %}">
+            action="{% url 'update' product.productid %}">
             {% csrf_token %}
             <h1>Chỉnh sửa sản phẩm</h1>
             <div class="form-group">
@@ -22,7 +22,6 @@
             <div class="form-group">
                 <label for="category">Danh mục:</label>
                 <select id="category" name="category_id">
-                    <option value="all">Tất cả</option>
                     {% for category in categories %}
                         <optgroup label="{{ category.main_category.name }}">
                             {% for subcategory in category.sub_categories %}

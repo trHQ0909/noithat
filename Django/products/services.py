@@ -153,6 +153,7 @@ def get_product_detail(product_id):
             "average_rating": product.average_rating,
             "total_reviews": product.total_reviews,
             "images": images,
+            "category_id":category.categoryid,
 
             # Thông tin Category
             "category": {

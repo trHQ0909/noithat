@@ -8,33 +8,74 @@ from products.services import *
 from admin_web.services import *
 from accounts.services import *
 from order.services import *
-def main_view(request, category_id=None):
-    """Hiển thị danh sách danh mục và sản phẩm (có thể lọc theo danh mục)"""
-    statistics=get_statistics()
-    orders=get_order_list()
-    sold_products=get_sold_products()
-    stock_products=get_stock_products()
-    total_stock=get_total_stock()
-    total_revenue=get_total_revenue()
+# def main_view(request, category_id=None):
+#     """Hiển thị danh sách danh mục và sản phẩm (có thể lọc theo danh mục)"""
+#     statistics=get_statistics()
+#     orders=get_order_list()
+#     sold_products=get_sold_products()
+#     stock_products=get_stock_products()
+#     total_stock=get_total_stock()
+#     total_revenue=get_total_revenue()
 
     
-    categories = get_all_category_with_subcategories()  # Lấy danh mục chính và danh mục phụ
+#     categories = get_all_category_with_subcategories()  # Lấy danh mục chính và danh mục phụ
     
-    if category_id:
-        products = get_products_by_category(category_id)  # Lọc sản phẩm theo danh mục
+#     if category_id:
+#         products = get_products_by_category(category_id)  # Lọc sản phẩm theo danh mục
+#     else:
+#         products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+    
+#     return render(request, "admin_web/manage.html", {
+#         "categories": categories,
+#         "products": products,
+#         "statistics":statistics,
+#         "orders":orders,
+#         "sold_products":sold_products,
+#         "stock_products":stock_products,
+#         "total_revenue":total_revenue,
+#         "total_stock":total_stock,
+#     })
+def main_view(request, category_id=None):
+    statistics = get_statistics()
+    order_status_stats = get_order_status_stats()
+    order_trend_data = get_order_trend_data()
+    top_products = get_top_products()
+#     top_products = {
+#     'labels': ['Sofa cao cấp', 'Bàn gỗ', 'Ghế xoay', 'Tủ quần áo', 'Kệ sách'],
+#     'total_sold': [100, 80, 60, 50, 40],
+#     'revenues': [100000000, 64000000, 36000000, 75000000, 20000000]
+# }
+    inventory_data = get_inventory_data()
+    productStocks=get_stock_products()
+    categories = get_all_category_with_subcategories()
+    
+    if category_id and category_id != 'all':
+        try:
+            category_id = int(category_id)
+            products = get_products_by_category(category_id)
+        except ValueError:
+            products = get_all_products_with_main_image()
     else:
-        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        products = get_all_products_with_main_image()
     
-    return render(request, "admin_web/manage.html", {
-        "categories": categories,
-        "products": products,
-        "statistics":statistics,
-        "orders":orders,
-        "sold_products":sold_products,
-        "stock_products":stock_products,
-        "total_revenue":total_revenue,
-        "total_stock":total_stock,
-    })
+    orders = Order.objects.all()[:50]
+    sold_products = OrderDetail.objects.all()[:50]
+    
+    context = {
+        'categories': categories,
+        'products': products,
+        'statistics': statistics,
+        'order_status_stats': order_status_stats,
+        'order_trend_data': order_trend_data,
+        'top_products': top_products,
+        'inventory_data': inventory_data,
+        'productStocks':productStocks,
+        'orders': orders,
+        'sold_products': sold_products,
+    }
+    
+    return render(request, 'admin_web/manage.html', context)
+
 def get_next_folder_number(base_path):
     """Tìm thư mục có số thứ tự cao nhất và trả về số tiếp theo."""
     if not os.path.exists(base_path):
@@ -114,6 +155,7 @@ def update_product_view(request, product_id):
         else : sold=soldtest
         status = request.POST.get("status", 1)  # Nếu không có, mặc định là 1
         new_images = request.FILES.getlist("images")  # Danh sách ảnh từ form
+        print(category_id)
         
         # Cập nhật thông tin sản phẩm
         product.name = name
@@ -124,6 +166,7 @@ def update_product_view(request, product_id):
         product.sold = sold
         product.status = status
         update_product(product)
+        print(product.categoryid.categoryid)
 
         # **Xử lý ảnh**
         existing_images = list(ProductImage.objects.filter(productid=product).values_list("image_url", flat=True))

@@ -254,3 +254,13 @@ table tbody tr:hover {
   margin-bottom: 15px;
   cursor: pointer;
 }
+.chart-container {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 10px;
+}
+.chart-containerstatus {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 10px;
+}
