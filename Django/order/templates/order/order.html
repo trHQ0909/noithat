@@ -178,7 +178,7 @@
         <h2>Thanh Toán Đơn Hàng</h2>
 
         <!-- Thông tin khách hàng -->
-        <form id="updateForm" method="post" enctype="multipart/form-data" action="{% url 'OrderProduct' product.product_id %}">
+        <form id="updateForm" method="post" enctype="multipart/form-data" action="{% url 'OrderProduct' product.productid %}">
             {% csrf_token %}
             <div class="form-group">
                 <label for="fullName">Họ và Tên</label>

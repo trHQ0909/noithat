@@ -9,3 +9,5 @@ Giao diện khách hàng
 +)Xem thông tin cá nhân.
 Giao diện admin:
 +Thêm biểu đồ. 
+
+Xử lí với productDetail và chuyển trang sang checkout.Nếu ở prduct/script có thêm alert thì nó chuyển trang được đến trang muốn theo window.located,còn nếu không có thì nó sẽ chuyển sang trang checkout của web mặc định sẵn.OK

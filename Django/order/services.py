@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from .models import Order, Customer
 from django.db.models import Sum
+from datetime import datetime
 
 def create_order(customerid, payment_method,total_price, address,status="pending"):
     """
@@ -147,46 +148,41 @@ def addCart(customerid, productid, quantity=1):
         raise ValueError(f"Error adding product to cart: {e}")
 def getListOrder(customer_id):
     """
-    Lấy danh sách sản phẩm đã mua của khách hàng theo customerid,
-    bao gồm tên sản phẩm, thông tin chi tiết đơn hàng và ảnh chính.
-
+    Lấy danh sách các orderDetail của khách hàng, bao gồm:
+    - Thông tin sản phẩm (tên, ảnh chính, ID)
+    - Chi tiết đơn hàng (orderdetail_id, quantity, price, subtotal, order_id, order_date)
+    
     Args:
         customer_id (int): ID của khách hàng.
-
+    
     Returns:
-        list: Một danh sách các dictionary, mỗi dictionary chứa thông tin của một sản phẩm đã mua.
-              Mỗi dictionary có các key:
-                - 'product_name': Tên sản phẩm.
-                - 'main_image_url': URL của ảnh chính (None nếu không có).
-                - 'order_details': Một list các dictionary, mỗi dictionary chứa thông tin chi tiết đơn hàng
-                                   (orderdetailid, quantity, price, subtotal).
+        list: Danh sách các dictionary chứa thông tin orderDetail và sản phẩm tương ứng.
     """
-    purchased_products = Product.objects.filter(
-        orderdetail__orderid__customerid=customer_id
+    order_details = OrderDetail.objects.filter(
+        orderid__customerid=customer_id
+    ).select_related(
+        'productid',
+        'orderid'
     ).prefetch_related(
-        Prefetch('productimage_set', queryset=ProductImage.objects.filter(is_main=True), to_attr='main_images'),
-        'orderdetail_set__orderid'  # Để có thể truy cập thông tin Order nếu cần sau này
-    ).distinct()
+        Prefetch('productid__images', queryset=ProductImage.objects.filter(is_main=True), to_attr='main_images')
+    )
 
     results = []
-    for product in purchased_products:
+    for order_detail in order_details:
+        product = order_detail.productid
         main_image_url = product.main_images[0].image_url if hasattr(product, 'main_images') and product.main_images else None
-        order_details = []
-        for order_detail in product.orderdetail_set.all():
-            order_details.append({
-                'orderdetail_id': order_detail.orderdetailid,
-                'quantity': order_detail.quantity,
-                'price': order_detail.price,
-                'subtotal': order_detail.subtotal,
-                'order_id': order_detail.orderid.orderid, # Lấy order ID nếu cần
-                'order_date': order_detail.orderid.order_date, # Lấy ngày đặt hàng nếu cần
-                # Thêm các thông tin khác từ OrderDetail hoặc Order nếu cần
-            })
-
+        
         results.append({
+            'product_id': product.productid,
             'product_name': product.name,
-            'main_image_url': main_image_url,
-            'order_details': order_details,
+            'image_url': main_image_url,
+            'orderdetail_id': order_detail.orderdetailid,
+            'quantity': order_detail.quantity,
+            'price': order_detail.price,
+            'subtotal': order_detail.subtotal,
+            'order_id': order_detail.orderid.orderid,
+            'order_date': order_detail.orderid.order_date,
+            'status': order_detail.orderid.status  # Thêm trường status từ Order
         })
 
     return results
@@ -273,3 +269,4 @@ def update_cart(customer, quantity, cartid):
     except ValueError as ve:
         print(ve)
         return None
+#   Thêm rating

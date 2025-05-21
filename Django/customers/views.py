@@ -16,6 +16,7 @@ def customer(request,category_id=None):
         #---CART
         customer=get_customer_by_id(customerid)
         carts,total_amount=get_cart_items(customer)
+        listOrder=getListOrder(customer)
         #----
         if category_id:
             products = get_products_by_category(category_id)  # Lọc sản phẩm theo danh mục
@@ -28,7 +29,8 @@ def customer(request,category_id=None):
             "count_Cart":count_cart,
             "carts":carts,
             "total_amount":total_amount,
-            "customer":customer
+            "customer":customer,
+            "Orders":listOrder
         })
     else :
         if category_id:

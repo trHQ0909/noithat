@@ -1,4 +1,7 @@
 from django.db import models
+
+from customers.models import Customer
+from django.core.validators import MinValueValidator, MaxValueValidator  # Thêm dòng này
 class CategoryMain(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -25,6 +28,8 @@ class Product(models.Model):
     sold = models.IntegerField(blank=True, null=True)
     stock = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
+    average_rating = models.FloatField(default=0.0)  # Điểm trung bình (1-5)
+    total_reviews = models.PositiveIntegerField(default=0)  # Tổng số đánh giá
     class Meta:
         managed = False
         db_table = 'product'  # Đã xóa `managed = False`
@@ -39,3 +44,27 @@ class ProductImage(models.Model):
     class Meta:
         managed = False
         db_table = 'product_image'
+class ProductRating(models.Model):
+    rating_id = models.AutoField(primary_key=True, db_column='rating_id')
+    productid = models.ForeignKey(
+        Product, 
+        on_delete=models.CASCADE, 
+        db_column='productID',
+        related_name='ratings'
+    )
+    customerid = models.ForeignKey(
+        Customer, 
+        on_delete=models.CASCADE,
+        db_column='customerID',
+        related_name='product_ratings'
+    )
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],  # Thêm ràng buộc 1-5 sao
+        blank=True, 
+        null=True
+    )
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'product_ratings'    

@@ -4,9 +4,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt 
 from django.conf import settings
 from products.models import Category, CategoryMain, Product, ProductImage
-from products.services import ( get_all_category_with_subcategories,get_products_by_category,get_all_products_with_main_image,get_all_categories,get_category_by_id,get_product_by_id,get_product_detail
-)
-from admin_web.services import (create_product,update_product,delete_product,get_statistics,get_order_list,get_sold_products,get_stock_products,get_total_revenue,get_total_stock)
+from products.services import *
+from admin_web.services import *
+from accounts.services import *
+from order.services import *
 def main_view(request, category_id=None):
     """Hiển thị danh sách danh mục và sản phẩm (có thể lọc theo danh mục)"""
     statistics=get_statistics()
@@ -182,3 +183,108 @@ def get_product_detail_view(request,product_id):
     })
     
     
+# ABOUT US
+def aboutus(request):
+    categories = get_all_category_with_subcategories()  # Lấy danh mục chính và danh mục phụ
+    customerid=get_session_data(request,"customerid")
+    if customerid:
+        count_cart=count_Cart(customerid)
+        #---CART
+        customer=get_customer_by_id(customerid)
+        carts,total_amount=get_cart_items(customer)
+        ratings=get_all_ratings()
+
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/aboutus.html", {
+            "categories": categories,
+            "products": products,
+            "count_Cart":count_cart,
+            "carts":carts,
+            "total_amount":total_amount,
+            "customer":customer,
+            "ratings":ratings
+        })
+    else :
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/aboutus.html", {
+            "categories": categories,
+            "products": products,
+        })
+def contactUs(request):
+    categories = get_all_category_with_subcategories()  # Lấy danh mục chính và danh mục phụ
+    customerid=get_session_data(request,"customerid")
+    if customerid:
+        count_cart=count_Cart(customerid)
+        #---CART
+        customer=get_customer_by_id(customerid)
+        carts,total_amount=get_cart_items(customer)
+        ratings=get_all_ratings()
+
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/contactUs.html", {
+            "categories": categories,
+            "products": products,
+            "count_Cart":count_cart,
+            "carts":carts,
+            "total_amount":total_amount,
+            "customer":customer,
+            "ratings":ratings
+        })
+    else :
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/contactUs.html", {
+            "categories": categories,
+            "products": products,
+        })
+def FAQ(request):
+    categories = get_all_category_with_subcategories()  # Lấy danh mục chính và danh mục phụ
+    customerid=get_session_data(request,"customerid")
+    if customerid:
+        count_cart=count_Cart(customerid)
+        #---CART
+        customer=get_customer_by_id(customerid)
+        carts,total_amount=get_cart_items(customer)
+        ratings=get_all_ratings()
+
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/FAQ.html", {
+            "categories": categories,
+            "products": products,
+            "count_Cart":count_cart,
+            "carts":carts,
+            "total_amount":total_amount,
+            "customer":customer,
+            "ratings":ratings
+        })
+    else :
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/FAQ.html", {
+            "categories": categories,
+            "products": products,
+        })
+def Ship_return(request):
+    categories = get_all_category_with_subcategories()  # Lấy danh mục chính và danh mục phụ
+    customerid=get_session_data(request,"customerid")
+    if customerid:
+        count_cart=count_Cart(customerid)
+        #---CART
+        customer=get_customer_by_id(customerid)
+        carts,total_amount=get_cart_items(customer)
+        ratings=get_all_ratings()
+
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/ship_return.html", {
+            "categories": categories,
+            "products": products,
+            "count_Cart":count_cart,
+            "carts":carts,
+            "total_amount":total_amount,
+            "customer":customer,
+            "ratings":ratings
+        })
+    else :
+        products = get_all_products_with_main_image()  # Lấy tất cả sản phẩm nếu không lọc
+        return render(request, "admin_web/ship_return.html", {
+            "categories": categories,
+            "products": products,
+        })
